@@ -1,16 +1,36 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import shakespeareWorks from "./data/shakespeare";
+import RowEntry from "./components/RowEntry";
 
 function App() {
 	const [list, setList] = useState(null);
+	const [filteredResults, setFilteredResults] = useState([]);
+	const [searchInput, setSearchInput] = useState("");
+
+	const searchItems = (searchValue) => {
+		setSearchInput(searchValue);
+		if (searchValue !== "") {
+			const filteredData = list.docs.filter((item) =>
+				Object.values(item)
+					.join("")
+					.toLowerCase()
+					.includes(searchValue.toLowerCase())
+			);
+			setFilteredResults(filteredData);
+			console.log(filteredData);
+		} else {
+			setFilteredResults(list.docs);
+		}
+	};
 
 	useEffect(() => {
 		const fetchBookData = async () => {
 			const response = await fetch(
 				"https://openlibrary.org/search.json?q=author%3A%22William+Shakespeare%22&mode=everything&sort=rating&fields=key,title,author_name,editions,subject,first_publish_year"
 			);
-			const json = await response.json();
+			let json = await response.json();
+			json.docs = json.docs.filter((work, i) => i < 19);
 			setList(json);
 			console.log(json);
 		};
@@ -26,6 +46,21 @@ function App() {
 				poems, and several other poems
 			</h2>
 
+			<input
+				type="text"
+				placeholder="Search for Title..."
+				onChange={(inputTitle) => searchItems(inputTitle.target.value)}
+			/>
+
+			<span></span>
+
+			<input
+				type="text"
+				placeholder="Search for First Published Year..."
+				onChange={(inputYear) => searchItems(inputYear.target.value)}
+			/>
+			<span></span>
+
 			{list && (
 				<div className="table-wrap">
 					<table className="works-table">
@@ -37,33 +72,24 @@ function App() {
 							</tr>
 						</thead>
 						<tbody>
-							{list.docs
-								.filter((work, i) => i < 14)
-								.map((work, i) => {
-									const editions =
-										work.editions?.numFound ?? work.edition_count ?? "—";
-									const year = work.first_publish_year ?? "—";
-									const key = work.key ?? `${work.title}-${i}`;
-									return (
-										<tr key={key}>
-											<td className="title-cell" data-label="Title">
-												{work.title}
-											</td>
-											<td
-												className="year-cell"
-												data-label="First Published Year"
-											>
-												{year}
-											</td>
-											<td
-												className="editions-cell"
-												data-label="Number of Editions"
-											>
-												{editions}
-											</td>
-										</tr>
-									);
-								})}
+							{searchInput.length > 0
+								? // what happens if we have search input? what list do we use to display coins?
+								  filteredResults.map((work) => (
+										<RowEntry
+											key={work.key}
+											title={work.title}
+											numOfEditions={work.editions?.numFound ?? "N/A"}
+											year={work.first_publish_year ?? "N/A"}
+										/>
+								  ))
+								: list.docs.map((work) => (
+										<RowEntry
+											key={work.key}
+											title={work.title}
+											numOfEditions={work.editions?.numFound ?? "N/A"}
+											year={work.first_publish_year ?? "N/A"}
+										/>
+								  ))}
 						</tbody>
 					</table>
 				</div>

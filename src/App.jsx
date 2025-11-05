@@ -27,7 +27,7 @@ function App() {
 	useEffect(() => {
 		const fetchBookData = async () => {
 			const response = await fetch(
-				"https://openlibrary.org/search.json?q=author%3A%22William+Shakespeare%22&mode=everything&sort=rating&fields=key,title,author_name,editions,subject,first_publish_year"
+				"https://openlibrary.org/search.json?q=author%3A%22William+Shakespeare%22&mode=everything&sort=rating&fields=key,title,author_name,editions,first_publish_year"
 			);
 			let json = await response.json();
 			json.docs = json.docs.filter((work, i) => i < 19);
@@ -42,8 +42,8 @@ function App() {
 		<>
 			<h1>William Shakespeare's Works</h1>
 			<h2>
-				Shakespeare's works include 38 plays, 154 sonnets, two long narrative
-				poems, and several other poems
+				Shakespeare's works include 38 plays, 154 sonnets, 2 long narrative
+				poems, and several other poems.
 			</h2>
 
 			<input
